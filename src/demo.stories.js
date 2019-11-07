@@ -2,9 +2,29 @@ import React, { useRef } from 'react'
 import { storiesOf } from '@storybook/react'
 import ExcelJS from 'exceljs'
 import FileSaver from 'file-saver'
+import _ from 'lodash'
 
-storiesOf('内部|demo', module).add('default', () => {
-  const fileRef = useRef(null)
+import { sheetToJson, jsonToSheet } from './index'
+import { getColumns } from './util'
+
+const data = [
+  {
+    下单日期: '2019-11-07',
+    下单时间: '14:37:00',
+    出库日期: '2019-11-10',
+    收货日期: '2019-11-10',
+    运营配置名称: '预售'
+  },
+  {
+    下单日期: '2019-11-07',
+    下单时间: '14:37:00',
+    出库日期: '2019-11-10',
+    收货日期: '2019-11-10',
+    运营配置名称: '预售'
+  }
+]
+
+storiesOf('excel|demo', module).add('default', () => {
   const write = () => {
     const workbook = new ExcelJS.Workbook()
 
@@ -27,16 +47,16 @@ storiesOf('内部|demo', module).add('default', () => {
     ]
 
     const worksheet = workbook.addWorksheet('My Sheet')
-
-    worksheet.columns = [
-      { header: 'Id', key: 'id', width: 10 },
-      { header: 'Name', key: 'name', width: 32 },
-      { header: 'D.O.B.', key: 'dob', width: 10, outlineLevel: 1 }
-    ]
-
-    worksheet.addRow({ id: 1, name: '&BJohn Doe', dob: new Date(1970, 1, 1) })
-    worksheet.addRow({ id: 2, name: 'Jane Doe', dob: new Date(1965, 1, 7) })
-    worksheet.mergeCells('A4:B5')
+    worksheet.columns = getColumns(data[0])
+    _.forEach(data, item => {
+      worksheet.addRow(item).border = {
+        top: { style: 'thin' },
+        left: { style: 'thin' },
+        bottom: { style: 'thin' },
+        right: { style: 'thin' }
+      }
+    })
+    worksheet.mergeCells('A3:B3')
     worksheet.getCell('B2').font = {
       bold: true
     }
@@ -55,17 +75,57 @@ storiesOf('内部|demo', module).add('default', () => {
         FileSaver.saveAs(blob, 'test.xlsx')
       })
   }
+  return (
+    <button
+      onClick={() => {
+        write()
+      }}
+    >
+      demo
+    </button>
+  )
+})
+
+storiesOf('excel|common', module).add('default', () => {
+  const fileRef = useRef(null)
+  const write = () => {
+    jsonToSheet([data], {
+      sheetNames: ['订单'],
+      columns: [
+        {
+          header: '下单日期',
+          key: '下单日期',
+          width: 15
+        },
+        {
+          header: '下单时间',
+          key: '下单时间',
+          width: 15
+        },
+        {
+          header: '出库日期',
+          key: '出库日期',
+          width: 15
+        },
+        {
+          header: '收货日期',
+          key: '收货日期',
+          width: 15
+        },
+        {
+          header: '运营配置',
+          key: '运营配置名称',
+          width: 20
+        }
+      ],
+      fileName: 'demo.xlsx'
+    })
+  }
 
   const read = () => {
-    const workbook = new ExcelJS.Workbook()
-    const reader = new window.FileReader()
-    reader.readAsArrayBuffer(fileRef.current.files[0])
-    reader.onload = data => {
-      console.log(data.target.result)
-      workbook.xlsx.load(data.target.result).then(function(wb) {
-        console.log(wb)
-      })
-    }
+    sheetToJson(fileRef.current.files[0]).then(json => {
+      console.log(json)
+    })
   }
 
   return (

@@ -1,3 +1,4 @@
-var a = '1111'
+import { sheetToJson } from './sheet2json'
+import { jsonToSheet } from './json2sheet'
 
-export default a
+export { sheetToJson, jsonToSheet }
