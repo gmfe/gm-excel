@@ -1,3 +1,4 @@
+import FileSaver from 'file-saver'
 import _ from 'lodash'
 
 const getSheetArray = (worksheet, option = { includeEmpty: false }) => {
@@ -28,4 +29,17 @@ const getColumns = (row = {}) => {
   })
 }
 
-export { getSheetArray, getColumns }
+const exportXlsx = (workBook, fileName) => {
+  workBook.xlsx
+    .writeBuffer({
+      base64: true
+    })
+    .then(buffer => {
+      const blob = new window.Blob([buffer], {
+        type: 'application/octet-stream'
+      })
+      FileSaver.saveAs(blob, fileName.replace(/[<>\\:;?/*|]/g, '-'))
+    })
+}
+
+export { getSheetArray, getColumns, exportXlsx }

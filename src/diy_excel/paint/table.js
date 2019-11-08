@@ -1,0 +1,3 @@
+const paintTable = () => {}
+
+export { paintTable }
