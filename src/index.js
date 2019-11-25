@@ -1,9 +1,9 @@
 import ExcelJS from 'exceljs'
 import _ from 'lodash'
-import { diyToSheetCore } from './diy_excel'
+import { diyToSheet } from './core'
 import { getSheetArray, getColumns, exportXlsx } from './util'
 
-const sheetToJson = file => {
+const doImport = file => {
   return new Promise((resolve, reject) => {
     const workbook = new ExcelJS.Workbook()
     const reader = new window.FileReader()
@@ -21,7 +21,7 @@ const sheetToJson = file => {
   })
 }
 
-const jsonToSheet = (sheets, options = {}) => {
+const doExport = (sheets, options = {}) => {
   const workbook = new ExcelJS.Workbook()
   const sheetNames = options.sheetNames || []
   const fileName = options.fileName || 'download.xlsx'
@@ -34,11 +34,23 @@ const jsonToSheet = (sheets, options = {}) => {
   exportXlsx(workbook, fileName)
 }
 
-const diyToSheet = (sheets, options = {}) => {
+/**
+ * sheets -- [{ data, config }, ...]
+ * - data, array, 对应每个单数据
+ * - config, 导出单据模板, 暂时默认一个sheet内所有单对应一个模板
+ * options -- {fileName, sheetOptions: [{ sheetName, ...}, ...]}
+ * - fileName, string, 定义文件名
+ * - sheetOptions, array, 对应多个sheet设置
+ */
+const diyExport = (sheets, options = {}) => {
   const workbook = new ExcelJS.Workbook()
   const fileName = options.fileName || 'download.xlsx'
-  diyToSheetCore(sheets, options, workbook)
+
+  _.forEach(sheets, (sheet, index) => {
+    const option = options.sheetOptions[index]
+    diyToSheet(sheet, option, workbook)
+  })
   exportXlsx(workbook, fileName)
 }
 
-export { sheetToJson, jsonToSheet, diyToSheet }
+export { doImport, doExport, diyExport }

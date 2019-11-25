@@ -1,7 +1,9 @@
 import React, { useRef } from 'react'
 import { storiesOf } from '@storybook/react'
 
-import { sheetToJson, jsonToSheet } from './index'
+import { doImport, doExport, diyExport } from './index'
+import { configOne, configTwo } from './config/config'
+import { dataOne, dataTwo } from './config/data'
 
 const data = [
   {
@@ -24,7 +26,7 @@ storiesOf('excel|common', module)
   .add('default', () => {
     const fileRef = useRef(null)
     const write = () => {
-      jsonToSheet([data], {
+      doExport([data], {
         sheetNames: ['订单'],
         columns: [
           {
@@ -58,7 +60,7 @@ storiesOf('excel|common', module)
     }
 
     const read = () => {
-      sheetToJson(fileRef.current.files[0]).then(json => {
+      doImport(fileRef.current.files[0]).then(json => {
         console.log(json)
       })
     }
@@ -90,7 +92,19 @@ storiesOf('excel|common', module)
     )
   })
   .add('diy', () => {
-    const diy = () => {}
+    const diy = () => {
+      diyExport(
+        [
+          { config: configOne, sheetDatas: [dataOne, dataOne, dataOne] },
+          { config: configTwo, sheetDatas: [dataTwo] }
+        ],
+        {
+          fileName: 'diy_excel.xlsx',
+          sheetOptions: [{ sheetName: 'A sheet' }, { sheetName: 'B sheet' }]
+        }
+      )
+    }
+
     return (
       <>
         <button onClick={() => diy()}>diy export</button>
