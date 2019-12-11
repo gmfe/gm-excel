@@ -1,10 +1,9 @@
-import React, { useRef } from 'react'
+import React from 'react'
 import { storiesOf } from '@storybook/react'
 import ExcelJS from 'exceljs'
 import FileSaver from 'file-saver'
 import _ from 'lodash'
 
-import { sheetToJson, jsonToSheet } from './index'
 import { getColumns } from './util'
 
 const data = [
@@ -57,6 +56,7 @@ storiesOf('excel|demo', module).add('default', () => {
       }
     })
     worksheet.mergeCells('A3:B3')
+    worksheet.mergeCells(4, 5, 6, 7)
     worksheet.getCell('B2').font = {
       bold: true
     }
@@ -83,74 +83,5 @@ storiesOf('excel|demo', module).add('default', () => {
     >
       demo
     </button>
-  )
-})
-
-storiesOf('excel|common', module).add('default', () => {
-  const fileRef = useRef(null)
-  const write = () => {
-    jsonToSheet([data], {
-      sheetNames: ['订单'],
-      columns: [
-        {
-          header: '下单日期',
-          key: '下单日期',
-          width: 15
-        },
-        {
-          header: '下单时间',
-          key: '下单时间',
-          width: 15
-        },
-        {
-          header: '出库日期',
-          key: '出库日期',
-          width: 15
-        },
-        {
-          header: '收货日期',
-          key: '收货日期',
-          width: 15
-        },
-        {
-          header: '运营配置',
-          key: '运营配置名称',
-          width: 20
-        }
-      ],
-      fileName: 'demo.xlsx'
-    })
-  }
-
-  const read = () => {
-    sheetToJson(fileRef.current.files[0]).then(json => {
-      console.log(json)
-    })
-  }
-
-  return (
-    <>
-      <button
-        onClick={() => {
-          write()
-        }}
-      >
-        写
-      </button>
-      <input
-        type='file'
-        accept='.xlsx'
-        ref={fileRef}
-        onChange={() => read()}
-        style={{ display: 'none' }}
-      />
-      <button
-        onClick={() => {
-          fileRef.current.click()
-        }}
-      >
-        读
-      </button>
-    </>
   )
 })
