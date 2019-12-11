@@ -113,7 +113,13 @@ const diyToSheetRowInOrder = (row, sheetColumns, worksheet) => {
   // 行字段数
   const fieldNum = rowKeys.length / 2
   // 计算每一项需合并的单元格个数
-  const mergeCellNum = Math.ceil((sheetColumns - fieldNum) / fieldNum)
+  let mergeCellNum = Math.ceil((sheetColumns - fieldNum) / fieldNum)
+
+  // 可能存在合并单元格数目过大超过总列数, 此时前面字段合并单元格减少
+  const totalCell = mergeCellNum * (fieldNum - 1) + fieldNum
+  if (totalCell >= sheetColumns) {
+    mergeCellNum--
+  }
 
   // style
   diyToSheetRowStyle(rowIndex, rowStyle, worksheet)
@@ -137,8 +143,14 @@ const diyToSheetRowAverage = (row, sheetColumns, worksheet) => {
   diyToSheetRowStyle(rowIndex, rowStyle, worksheet)
 
   // 合并单元格
-  const mergeCellNum = Math.ceil(sheetColumns / rowKeys.length)
+  let mergeCellNum = Math.ceil(sheetColumns / rowKeys.length)
   const fieldNum = rowKeys.length
+
+  // 可能存在合并单元格数目过大超过总列数, 此时前面字段合并单元格减少
+  const totalCell = mergeCellNum * (fieldNum - 1)
+  if (totalCell >= sheetColumns) {
+    mergeCellNum--
+  }
   const _row = { data: rowKeys, fieldNum, mergeCellNum, rowIndex, rowStyle }
   diyToSheetMergeCells(_row, sheetColumns, 'average', worksheet)
 }
