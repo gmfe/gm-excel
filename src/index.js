@@ -1,6 +1,6 @@
 import ExcelJS from 'exceljs'
 import _ from 'lodash'
-import { diyToSheet } from './core'
+import { diyToSheet, diyToSheetV2 } from './core'
 import { getSheetArray, getColumns, exportXlsx } from './util'
 
 const doImport = file => {
@@ -53,4 +53,15 @@ const diyExport = (sheets, options = {}) => {
   exportXlsx(workbook, fileName)
 }
 
-export { doImport, doExport, diyExport }
+const diyExportV2 = (sheets, options = {}) => {
+  const workbook = new ExcelJS.Workbook()
+  const fileName = options.fileName || 'download.xlsx'
+
+  _.forEach(sheets, (sheet, index) => {
+    const option = options.sheetOptions[index]
+    diyToSheetV2(sheet, option, workbook)
+  })
+  exportXlsx(workbook, fileName)
+}
+
+export { doImport, doExport, diyExport, diyExportV2 }

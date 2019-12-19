@@ -2,7 +2,13 @@ import _ from 'lodash'
 
 import { diyToSheetTable } from './paint/table'
 import { diyToSheetBlock } from './paint/block'
-import { setCellStyle, getSheetColumns } from '../util'
+import {
+  getSheetColumns,
+  setCellStyle,
+  diyToSheetRowHeight,
+  diyToSheetColWidth
+} from './util'
+import { diyToSheetV2 } from './diy_export_v2'
 
 const diyToSheetTitle = (row, sheetColumns, worksheet) => {
   const { title, fromIndex, data } = row
@@ -125,27 +131,28 @@ const diyToSheet = (diyOriginals, diyOptions, workbook) => {
 
   // 自定义sheet列宽
   const { config } = diyOriginals
-  const { content } = config
-  const sheetColumns = getSheetColumns(content)
+  // const sheetColumns = worksheet.columnCount
   if (config.colWidth) {
-    let columnIndex = 1
-    while (columnIndex <= sheetColumns) {
-      const col = worksheet.getColumn(columnIndex)
-      col.width = config.colWidth
-      columnIndex++
-    }
+    // let columnIndex = 1
+    // while (columnIndex <= sheetColumns) {
+    //   const col = worksheet.getColumn(columnIndex)
+    //   col.width = config.colWidth
+    //   columnIndex++
+    // }
+    diyToSheetColWidth(worksheet, config.colWidth)
   }
 
   // 自定义行高
-  const sheetRows = worksheet.rowCount
+  // const sheetRows = worksheet.rowCount
   if (config.rowHeight) {
-    let columnIndex = 1
-    while (columnIndex < sheetRows) {
-      const row = worksheet.getRow(columnIndex)
-      row.height = config.rowHeight
-      columnIndex++
-    }
+    // let columnIndex = 1
+    // while (columnIndex < sheetRows) {
+    //   const row = worksheet.getRow(columnIndex)
+    //   row.height = config.rowHeight
+    //   columnIndex++
+    // }
+    diyToSheetRowHeight(worksheet, config.rowHeight)
   }
 }
 
-export { diyToSheet }
+export { diyToSheet, diyToSheetV2 }

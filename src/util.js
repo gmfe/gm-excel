@@ -42,40 +42,4 @@ const exportXlsx = (workBook, fileName) => {
     })
 }
 
-const getBorderStyle = border => {
-  if (border) {
-    return { style: 'thin' }
-  }
-  return {}
-}
-
-const setCellStyle = (cell, style) => {
-  if (style.border) {
-    const { top, left, bottom, right } = style.border
-    cell.border = {
-      top: getBorderStyle(top),
-      left: getBorderStyle(left),
-      bottom: getBorderStyle(bottom),
-      right: getBorderStyle(right)
-    }
-  }
-  cell.alignment = style.alignment || {}
-  cell.font = style.font || {}
-}
-
-const getSheetColumns = content => {
-  const table = _.find(
-    content,
-    item => item.type === 'table' && item.decisiveColumn
-  )
-  return table.columns.length
-}
-
-export {
-  getSheetArray,
-  getColumns,
-  exportXlsx,
-  getBorderStyle,
-  setCellStyle,
-  getSheetColumns
-}
+export { getSheetArray, getColumns, exportXlsx }

@@ -1,9 +1,11 @@
 import React, { useRef } from 'react'
 import { storiesOf } from '@storybook/react'
 
-import { doImport, doExport, diyExport } from './index'
+import { doImport, doExport, diyExport, diyExportV2 } from './index'
 import { configOne, configTwo } from './config/config'
 import { dataOne, dataTwo } from './config/data'
+import { configV2 } from './config/config_v2'
+import { dataV2 } from './config/data_v2'
 
 const data = [
   {
@@ -98,6 +100,23 @@ storiesOf('excel|common', module)
           { config: configOne, sheetDatas: [dataOne, dataOne, dataOne] },
           { config: configTwo, sheetDatas: [dataTwo] }
         ],
+        {
+          fileName: 'diy_excel.xlsx',
+          sheetOptions: [{ sheetName: 'A sheet' }, { sheetName: 'B sheet' }]
+        }
+      )
+    }
+
+    return (
+      <>
+        <button onClick={() => diy()}>diy export</button>
+      </>
+    )
+  })
+  .add('diyV2', () => {
+    const diy = () => {
+      diyExportV2(
+        [{ config: configV2, sheetDatas: [dataV2, dataV2, dataV2] }],
         {
           fileName: 'diy_excel.xlsx',
           sheetOptions: [{ sheetName: 'A sheet' }, { sheetName: 'B sheet' }]

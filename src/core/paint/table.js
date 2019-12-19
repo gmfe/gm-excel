@@ -1,6 +1,6 @@
 import _ from 'lodash'
 
-import { getBorderStyle } from '../../util'
+import { getBorderStyle } from '../util'
 
 /** table - { fromIndex, table, tableRowCount, style }
  */
@@ -119,7 +119,10 @@ const getTableColumns = (table, worksheet) => {
 }
 
 /**
- * table -- { fromIndex, table, data } - { 初始行, table字段设置, 对应数据 }
+ * tableDatas -- { fromIndex, table, data } - { 初始行, table字段设置, 对应数据 }
+ * fromInex -- 起始行
+ * table -- table配置信息，{ id, type, style, columns}
+ * data -- table数据，{id, columns(每行数据)}
  */
 const diyToSheetTable = (tableDatas, worksheet) => {
   const { fromIndex, table, data } = tableDatas
