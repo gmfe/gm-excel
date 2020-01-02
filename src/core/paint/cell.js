@@ -1,6 +1,29 @@
 import _ from 'lodash'
 
-import { setCellStyle } from '../util'
+const _getBorderStyle = l => {
+  if (l) {
+    return { style: 'thin' }
+  }
+  return {}
+}
+
+const getBorderStyle = border => {
+  const { top, left, bottom, right } = border
+  return {
+    top: _getBorderStyle(top),
+    left: _getBorderStyle(left),
+    bottom: _getBorderStyle(bottom),
+    right: _getBorderStyle(right)
+  }
+}
+
+const setCellStyle = (cell, style) => {
+  if (style.border) {
+    cell.border = getBorderStyle(style.border)
+  }
+  cell.alignment = style.alignment || {}
+  cell.font = style.font || {}
+}
 
 /**
  * from - 起始单元格
@@ -107,4 +130,10 @@ const diyCustomToSheetMergeCells = (rowIndex, rowKeys, worksheet) => {
   })
 }
 
-export { mergeCells, diyToSheetMergeCells, diyCustomToSheetMergeCells }
+export {
+  mergeCells,
+  setCellStyle,
+  getBorderStyle,
+  diyToSheetMergeCells,
+  diyCustomToSheetMergeCells
+}

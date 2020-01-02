@@ -207,5 +207,21 @@ export const dataV2 = [
         all: '合计'
       }
     ]
+  },
+  {
+    type: 'block',
+    id: 'mul_block1',
+    columns: [
+      {
+        leibie: '蔬菜',
+        num: '序号',
+        sku_name: '商品名',
+        real_num: '实配',
+        unit_price: '单价',
+        sum: '应付金额',
+        remark: '备注',
+        all: '合计'
+      }
+    ]
   }
 ]

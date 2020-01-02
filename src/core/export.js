@@ -8,7 +8,7 @@ import {
   diyToSheetColWidth
 } from './util'
 
-const diyToSheetCoreV2 = (config, data, worksheet) => {
+const _doExportCoreV2 = (config, data, worksheet) => {
   const sheetColumns = getSheetColumns(config)
 
   _.forEach(config, item => {
@@ -36,13 +36,13 @@ const diyToSheetCoreV2 = (config, data, worksheet) => {
  * - sheetDatas, array, 总sheet数据
  * diyOptions - [{ sheetName, ...}, ...]
  */
-const diyToSheetV2 = (diyOriginals, diyOptions, workbook) => {
+const exportCoreV2 = (diyOriginals, diyOptions, workbook) => {
   const sheetName = diyOptions.sheetName
   const worksheet = workbook.addWorksheet(sheetName)
 
   const { config, sheetDatas } = diyOriginals
   _.forEach(sheetDatas, data => {
-    diyToSheetCoreV2(config, data, worksheet)
+    _doExportCoreV2(config, data, worksheet)
     worksheet.addRow()
   })
 
@@ -56,4 +56,4 @@ const diyToSheetV2 = (diyOriginals, diyOptions, workbook) => {
   }
 }
 
-export { diyToSheetV2 }
+export { exportCoreV2 }

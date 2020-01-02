@@ -29,8 +29,8 @@ const border = {
  * - {type, colWidth, rowHeight}
  *
  * block
- * - {type, id, block: {style, rows : {columns:[]}}}
- * - custome表示是否该区域自定义单元格合并大小
+ * - {type, id, customer, block: {style, rows : {columns:[]}}}
+ * - customer表示是否该区域自定义单元格合并大小 size: [x行， y列]表示需要x行y列大小
  * - 详细见下例
  *
  * table
@@ -46,7 +46,7 @@ export const configV2 = [
   {
     type: 'block',
     id: 'title',
-    custome: true,
+    customer: true,
     block: {
       style: {
         border,
@@ -415,7 +415,7 @@ export const configV2 = [
   {
     id: 'mul_block',
     type: 'block',
-    custome: true,
+    customer: true,
     block: {
       style: {
         border,
@@ -454,6 +454,34 @@ export const configV2 = [
             {
               key: 'all',
               size: [4, 1]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    id: 'mul_block1',
+    type: 'block',
+    customer: true,
+    block: {
+      style: {
+        border,
+        alignment
+      },
+      rows: [
+        {
+          columns: [
+            {
+              key: 'leibie',
+              size: [1, 2]
+            },
+            {
+              key: 'num'
+            },
+            {
+              key: 'sku_name',
+              size: [1, 2]
             }
           ]
         }

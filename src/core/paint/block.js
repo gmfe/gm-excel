@@ -23,7 +23,7 @@ const diyToSheetBlockPre = (
     data: itemData.columns
   }
 
-  if (item.custome) {
+  if (item.customer) {
     // 自定义单元格合并
     diyCustomToSheetBlock(blockData, worksheet)
   } else {

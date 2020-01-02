@@ -1,7 +1,6 @@
 import _ from 'lodash'
 
-import { setCellStyle } from '../util'
-import { mergeCells, diyToSheetMergeCells } from './cell'
+import { mergeCells, setCellStyle, diyToSheetMergeCells } from './cell'
 
 const insertDataToRow = (rowData, worksheet) => {
   worksheet.addRow(rowData)
@@ -15,7 +14,7 @@ const getRowData = (rowKeys, data) => {
   return rowData
 }
 
-const diyToSheetRowStyle = (rowIndex, style, worksheet) => {
+const setRowStyle = (rowIndex, style, worksheet) => {
   if (style) {
     const nowRow = worksheet.getRow(rowIndex)
     nowRow.eachCell(function(cell, colNumber) {
@@ -51,7 +50,7 @@ const diyToSheetRowInOrder = (row, sheetColumns, worksheet) => {
   }
 
   // style
-  diyToSheetRowStyle(rowIndex, rowStyle, worksheet)
+  setRowStyle(rowIndex, rowStyle, worksheet)
 
   // 合并单元格操作
   if (isNeedMergeCell) {
@@ -69,7 +68,7 @@ const diyToSheetRowAverage = (row, sheetColumns, worksheet) => {
   insertDataToRow(_rowData, worksheet)
 
   // style
-  diyToSheetRowStyle(rowIndex, rowStyle, worksheet)
+  setRowStyle(rowIndex, rowStyle, worksheet)
 
   // 合并单元格
   let mergeCellNum = Math.ceil(sheetColumns / rowKeys.length)
@@ -106,11 +105,10 @@ const diyCustomToSheetRow = (row, worksheet) => {
 
   // 插入数据
   const _rowData = getRowData(rowKeys, rowData)
-  console.log(_rowData)
   insertDataToRow(_rowData, worksheet)
 
   // 设置样式
-  diyToSheetRowStyle(rowIndex, rowStyle, worksheet)
+  setRowStyle(rowIndex, rowStyle, worksheet)
 }
 
 export {

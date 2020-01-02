@@ -1,6 +1,6 @@
 import _ from 'lodash'
 
-import { getBorderStyle } from '../util'
+import { getBorderStyle } from './cell'
 
 /** table - { fromIndex, table, tableRowCount, style }
  */
@@ -41,13 +41,7 @@ const setTableStyle = (tableSet, worksheet) => {
   let tableFont = {}
   // 边框定义
   if (tableStyle && tableStyle.border) {
-    const { top, left, bottom, right } = tableStyle.border
-    tableBorder = {
-      top: getBorderStyle(top),
-      left: getBorderStyle(left),
-      bottom: getBorderStyle(bottom),
-      right: getBorderStyle(right)
-    }
+    tableBorder = getBorderStyle(tableStyle.border)
   }
 
   // 字体粗细定义
