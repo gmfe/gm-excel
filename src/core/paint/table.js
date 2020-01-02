@@ -1,6 +1,6 @@
 import _ from 'lodash'
 
-import { getBorderStyle } from '../../util'
+import { getBorderStyle } from './cell'
 
 /** table - { fromIndex, table, tableRowCount, style }
  */
@@ -41,13 +41,7 @@ const setTableStyle = (tableSet, worksheet) => {
   let tableFont = {}
   // 边框定义
   if (tableStyle && tableStyle.border) {
-    const { top, left, bottom, right } = tableStyle.border
-    tableBorder = {
-      top: getBorderStyle(top),
-      left: getBorderStyle(left),
-      bottom: getBorderStyle(bottom),
-      right: getBorderStyle(right)
-    }
+    tableBorder = getBorderStyle(tableStyle.border)
   }
 
   // 字体粗细定义
@@ -119,7 +113,10 @@ const getTableColumns = (table, worksheet) => {
 }
 
 /**
- * table -- { fromIndex, table, data } - { 初始行, table字段设置, 对应数据 }
+ * tableDatas -- { fromIndex, table, data } - { 初始行, table字段设置, 对应数据 }
+ * fromInex -- 起始行
+ * table -- table配置信息，{ id, type, style, columns}
+ * data -- table数据，{id, columns(每行数据)}
  */
 const diyToSheetTable = (tableDatas, worksheet) => {
   const { fromIndex, table, data } = tableDatas

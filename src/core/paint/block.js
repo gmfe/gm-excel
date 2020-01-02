@@ -1,12 +1,41 @@
+import _ from 'lodash'
+
 import {
   diyToSheetRowAverage,
   diyToSheetRowInOrder,
-  diyToSheetRowAll
+  diyToSheetRowAll,
+  diyCustomToSheetRow
 } from './row'
-import _ from 'lodash'
+import { diyCustomToSheetMergeCells } from './cell'
+
+const diyToSheetBlockPre = (
+  { item, initIndex, itemData, sheetColumns },
+  worksheet
+) => {
+  if (!item.block.rows.length) {
+    worksheet.addRow()
+    return
+  }
+
+  const blockData = {
+    block: item.block,
+    fromIndex: initIndex,
+    data: itemData.columns
+  }
+
+  if (item.customer) {
+    // 自定义单元格合并
+    diyCustomToSheetBlock(blockData, worksheet)
+  } else {
+    diyToSheetBlock(blockData, sheetColumns, worksheet)
+  }
+}
 
 /**
- * 需要记录
+ * blockData -- block相关数据和配置
+ * block -- block配置, { style, rows }
+ * formIndex -- 起始行
+ * data -- block数据，对象数据，一个元素代表一行字段值
  * */
 const diyToSheetBlock = (blockData, sheetColumns, worksheet) => {
   const { block, fromIndex, data } = blockData
@@ -40,4 +69,30 @@ const diyToSheetBlock = (blockData, sheetColumns, worksheet) => {
   })
 }
 
-export { diyToSheetBlock }
+const diyCustomToSheetBlock = (blockData, worksheet) => {
+  const { block, fromIndex, data } = blockData
+  const { rows } = block
+
+  _.forEach(data, (item, index) => {
+    let style = block.style || {}
+    // 行样式
+    if (rows[0].style) {
+      style = {
+        ...style,
+        ...item.style
+      }
+    }
+
+    const row = {
+      rowIndex: index + fromIndex,
+      rowKeys: rows[0].columns,
+      rowData: item,
+      rowStyle: style
+    }
+    diyCustomToSheetRow(row, worksheet)
+  })
+  // 合并单元格
+  diyCustomToSheetMergeCells(fromIndex, rows[0].columns, worksheet)
+}
+
+export { diyToSheetBlockPre, diyToSheetBlock }
