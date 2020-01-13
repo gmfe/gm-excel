@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import { getColumns } from '../util'
 
 const getSheetColumns = content => {
   const table = _.find(
@@ -28,4 +29,19 @@ const diyToSheetColWidth = (worksheet, colWidth) => {
   }
 }
 
-export { getSheetColumns, diyToSheetRowHeight, diyToSheetColWidth }
+const exportSample = (sheets, options, workbook) => {
+  const sheetNames = options.sheetNames || []
+  _.forEach(sheets, (sheet, key) => {
+    const sheetName = sheetNames[key] || `Sheet${key + 1}`
+    const worksheet = workbook.addWorksheet(sheetName)
+    worksheet.columns = options.columns || getColumns(sheet[0])
+    worksheet.addRows(sheet)
+  })
+}
+
+export {
+  getSheetColumns,
+  diyToSheetRowHeight,
+  diyToSheetColWidth,
+  exportSample
+}

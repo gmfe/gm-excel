@@ -1,7 +1,7 @@
 import ExcelJS from 'exceljs'
 import _ from 'lodash'
-import { diyCore, exportCoreV2 } from './core'
-import { getSheetArray, getColumns, exportXlsx } from './util'
+import { diyCore, exportCoreV2, exportSample } from './core'
+import { getSheetArray, exportXlsx } from './util'
 
 const doImport = file => {
   return new Promise((resolve, reject) => {
@@ -10,27 +10,33 @@ const doImport = file => {
     const option = { includeEmpty: true }
     reader.readAsArrayBuffer(file)
     reader.onload = data => {
-      workbook.xlsx.load(data.target.result).then(() => {
-        const xlsxJson = []
-        workbook.eachSheet(worksheet => {
-          xlsxJson.push({ [worksheet.name]: getSheetArray(worksheet, option) })
-        })
-        resolve(xlsxJson)
-      })
+      workbook.xlsx.load(data.target.result).then(
+        () => {
+          const xlsxJson = []
+          workbook.eachSheet(worksheet => {
+            xlsxJson.push({
+              [worksheet.name]: getSheetArray(worksheet, option)
+            })
+          })
+          resolve(xlsxJson)
+        },
+        err => {
+          reject(err)
+        }
+      )
     }
   })
 }
 
+/**
+ *
+ * @param {*} sheets [[{row},...], ...]
+ * @param {*} options {fileName, sheetNames}
+ */
 const doExport = (sheets, options = {}) => {
   const workbook = new ExcelJS.Workbook()
-  const sheetNames = options.sheetNames || []
   const fileName = options.fileName || 'download.xlsx'
-  _.forEach(sheets, (rows, key) => {
-    const sheetName = sheetNames[key] || `Sheet${key + 1}`
-    const worksheet = workbook.addWorksheet(sheetName)
-    worksheet.columns = options.columns || getColumns(rows[0])
-    worksheet.addRows(rows)
-  })
+  exportSample(sheets, options, workbook)
   exportXlsx(workbook, fileName)
 }
 
