@@ -1,17 +1,11 @@
 export const dataV2 = [
   {
     type: 'block',
-    id: 'title',
+    id: 'block6',
     columns: [
       {
         name: '观麦送菜'
-      }
-    ]
-  },
-  {
-    type: 'block',
-    id: 'block6',
-    columns: [
+      },
       {
         service_tel: '客服电话：13687988976'
       },

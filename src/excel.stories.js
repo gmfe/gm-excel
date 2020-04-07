@@ -115,10 +115,16 @@ storiesOf('excel|common', module)
   })
   .add('Export V2', () => {
     const doExport = () => {
-      doExportV2([{ config: configV2, sheetDatas: [dataV2, dataV2, dataV2] }], {
-        fileName: 'diy_excel.xlsx',
-        sheetOptions: [{ sheetName: 'A sheet' }, { sheetName: 'B sheet' }]
-      })
+      doExportV2(
+        [
+          { config: configV2, sheetDatas: [dataV2] },
+          { config: configV2, sheetDatas: [dataV2] }
+        ],
+        {
+          fileName: 'diy_excel.xlsx',
+          sheetOptions: [{ sheetName: 'A sheet' }, { sheetName: 'B sheet' }]
+        }
+      )
     }
 
     return (
