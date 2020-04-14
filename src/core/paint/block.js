@@ -59,12 +59,15 @@ const diyToSheetBlock = (blockData, sheetColumns, worksheet) => {
     }
 
     // 插入数据 layout: 'average' - 均分表格插入, 'inOrder' - 顺序插入表格, 'all' - 占据整行插入
-    if (item.layout === 'average') {
-      diyToSheetRowAverage(row, sheetColumns, worksheet)
-    } else if (item.layout === 'inOrder') {
-      diyToSheetRowInOrder(row, sheetColumns, worksheet)
-    } else {
-      diyToSheetRowAll(row, sheetColumns, worksheet)
+    switch (item.layout) {
+      case 'average':
+        diyToSheetRowAverage(row, sheetColumns, worksheet)
+        break
+      case 'all':
+        diyToSheetRowAll(row, sheetColumns, worksheet)
+        break
+      default:
+        diyToSheetRowInOrder(row, sheetColumns, worksheet)
     }
   })
 }

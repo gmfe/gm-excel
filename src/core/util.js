@@ -6,7 +6,29 @@ const getSheetColumns = content => {
     content,
     item => item.type === 'table' && item.decisiveColumn
   )
+
+  if (!table) {
+    Promise.reject(new Error('table need decisiveColumn'))
+  }
   return table.columns.length
+}
+
+const getColumnLength = content => {
+  let len = 1
+  _.each(content, temp => {
+    if (temp.type === 'table') {
+      if (temp.columns.length > len) {
+        len = temp.columns.length
+      }
+    } else if (temp.type === 'block') {
+      _.each(temp.block.rows, row => {
+        if (row.columns.length > len) {
+          len = row.columns.length
+        }
+      })
+    }
+  })
+  return len
 }
 
 const diyToSheetRowHeight = (worksheet, rowHeight) => {
@@ -40,6 +62,7 @@ const exportSample = (sheets, options, workbook) => {
 }
 
 export {
+  getColumnLength,
   getSheetColumns,
   diyToSheetRowHeight,
   diyToSheetColWidth,

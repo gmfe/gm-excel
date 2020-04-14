@@ -40,33 +40,8 @@ const border = {
 export const configV2 = [
   {
     type: 'style',
-    colWidth: 15,
+    colWidth: 12,
     rowHeight: 20
-  },
-  {
-    type: 'block',
-    id: 'title',
-    customer: true,
-    block: {
-      style: {
-        border,
-        alignment,
-        font: {
-          size: 16,
-          bold: true
-        }
-      },
-      rows: [
-        {
-          columns: [
-            {
-              key: 'name',
-              size: [2, 9]
-            }
-          ]
-        }
-      ]
-    }
   },
   {
     type: 'block',
@@ -80,13 +55,33 @@ export const configV2 = [
         {
           columns: [
             {
+              key: 'name'
+            }
+          ],
+          layout: 'all',
+          style: {
+            border,
+            alignment,
+            font: {
+              size: 16,
+              bold: true
+            }
+          }
+        },
+        {
+          columns: [
+            {
               key: 'service_tel'
             }
           ],
           layout: 'all',
           style: {
             border,
-            alignment: alignmentRight
+            alignment: alignmentRight,
+            font: {
+              size: 11,
+              bold: true
+            }
           }
         },
         {
@@ -213,7 +208,6 @@ export const configV2 = [
   {
     id: 'table2',
     type: 'table',
-    decisiveColumn: true,
     style: {
       border
     },
@@ -249,6 +243,15 @@ export const configV2 = [
       {
         key: 'sum',
         header: '应付金额'
+      },
+      {
+        key: 'remark',
+        header: '备注',
+        style: {
+          alignment: {
+            wrapText: true
+          }
+        }
       },
       {
         key: 'remark',
@@ -333,6 +336,7 @@ export const configV2 = [
   {
     id: 'block3',
     type: 'block',
+    customer: true,
     block: {
       style: {
         border,
@@ -342,13 +346,10 @@ export const configV2 = [
         {
           columns: [
             {
-              key: 'one_sum'
-            },
-            {
-              key: 'one_money'
+              key: 'one_sum',
+              size: [1, 9]
             }
-          ],
-          layout: 'average'
+          ]
         }
       ]
     }

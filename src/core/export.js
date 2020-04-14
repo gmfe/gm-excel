@@ -3,13 +3,13 @@ import _ from 'lodash'
 import { diyToSheetTable } from './paint/table'
 import { diyToSheetBlockPre } from './paint/block'
 import {
-  getSheetColumns,
+  getColumnLength,
   diyToSheetRowHeight,
   diyToSheetColWidth
 } from './util'
 
 const _doExportCoreV2 = (config, data, worksheet) => {
-  const sheetColumns = getSheetColumns(config)
+  const sheetColumns = getColumnLength(config)
 
   _.forEach(config, item => {
     const itemData = _.find(data, v => v.id === item.id)

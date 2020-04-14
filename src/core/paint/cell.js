@@ -77,7 +77,7 @@ const diyToSheetMergeCells = (row, sheetColumns, type, worksheet) => {
       // 插入空单元格进行合并, 不影响插入的数据
       if (column <= sheetColumns) {
         const nowRow = worksheet.getRow(rowIndex)
-        const arr = new Array(size.column - 1).fill('')
+        const arr = new Array(size.column > 0 ? size.column - 1 : 0).fill('')
         nowRow.splice(column + 1, 0, ...arr)
       }
       mergeCells(from, size, worksheet)
