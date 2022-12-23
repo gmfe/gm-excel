@@ -1,4 +1,4 @@
-import ExcelJS from 'exceljs'
+import 'exceljs'
 import _ from 'lodash'
 import { diyCore, exportCoreV2, exportSample } from './core'
 import { getSheetArray, exportXlsx } from './util'
