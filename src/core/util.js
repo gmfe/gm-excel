@@ -61,10 +61,18 @@ const exportSample = (sheets, options, workbook) => {
   })
 }
 
+const setSheetRowFill = fillData => {
+  const { fromIndex, sheetColumns, worksheet, needFill } = fillData
+  worksheet.mergeCells(fromIndex, 1, fromIndex, sheetColumns)
+  const cell = worksheet.getRow(fromIndex).getCell(1)
+  cell.fill = needFill.fill
+}
+
 export {
   getColumnLength,
   getSheetColumns,
   diyToSheetRowHeight,
   diyToSheetColWidth,
-  exportSample
+  exportSample,
+  setSheetRowFill
 }
