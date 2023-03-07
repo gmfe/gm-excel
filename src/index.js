@@ -1,10 +1,18 @@
-import 'exceljs'
+import ExcelJS from 'exceljs'
 import _ from 'lodash'
-import { diyCore, exportCoreV2, exportSample } from './core'
+import {
+  diyCore,
+  exportCoreV2MergerOrder,
+  exportCoreV2,
+  exportSample
+} from './core'
 import { getSheetArray, exportXlsx } from './util'
 
 const doImport = file => {
   return new Promise((resolve, reject) => {
+    if (!ExcelJS) {
+      ExcelJS = window.ExcelJS
+    }
     const workbook = new ExcelJS.Workbook()
     const reader = new window.FileReader()
     const option = { includeEmpty: true }
@@ -34,6 +42,10 @@ const doImport = file => {
  * @param {*} options {fileName, sheetNames}
  */
 const doExport = (sheets, options = {}) => {
+  if (!ExcelJS) {
+    ExcelJS = window.ExcelJS
+  }
+
   const workbook = new ExcelJS.Workbook()
   const fileName = options.fileName || 'download.xlsx'
   exportSample(sheets, options, workbook)
@@ -49,23 +61,33 @@ const doExport = (sheets, options = {}) => {
  * - sheetOptions, array, 对应多个sheet设置
  */
 const diyExport = (sheets, options = {}) => {
+  if (!ExcelJS) {
+    ExcelJS = window.ExcelJS
+  }
   const workbook = new ExcelJS.Workbook()
   const fileName = options.fileName || 'download.xlsx'
+  const fileMergeRules = options.fileMergeRules || 0
 
   _.forEach(sheets, (sheet, index) => {
     const option = options.sheetOptions[index]
-    diyCore(sheet, option, workbook)
+    diyCore(sheet, option, workbook, fileMergeRules)
   })
   exportXlsx(workbook, fileName)
 }
 
 const doExportV2 = (sheets, options = {}) => {
+  if (!ExcelJS) {
+    ExcelJS = window.ExcelJS
+  }
   const workbook = new ExcelJS.Workbook()
   const fileName = options.fileName || 'download.xlsx'
+  const fileMergeRules = options.fileMergeRules || 0
 
   _.forEach(sheets, (sheet, index) => {
     const option = options.sheetOptions[index]
-    exportCoreV2(sheet, option, workbook)
+    fileMergeRules
+      ? exportCoreV2MergerOrder(sheet, option, workbook)
+      : exportCoreV2(sheet, option, workbook)
   })
   exportXlsx(workbook, fileName)
 }

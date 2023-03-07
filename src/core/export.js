@@ -5,7 +5,8 @@ import { diyToSheetBlockPre } from './paint/block'
 import {
   getColumnLength,
   diyToSheetRowHeight,
-  diyToSheetColWidth
+  diyToSheetColWidth,
+  setSheetRowFill
 } from './util'
 
 const _doExportCoreV2 = (config, data, worksheet) => {
@@ -41,9 +42,24 @@ const exportCoreV2 = (diyOriginals, diyOptions, workbook) => {
   const worksheet = workbook.addWorksheet(sheetName)
 
   const { config, sheetDatas } = diyOriginals
-  _.forEach(sheetDatas, data => {
+  const sheetDatasLength = sheetDatas.length - 1
+  const sheetColumns = getColumnLength(config)
+  const needFill = _.find(config, item => item.fill)
+
+  _.forEach(sheetDatas, (data, index) => {
     _doExportCoreV2(config, data, worksheet)
-    worksheet.addRow()
+    const fillData = {
+      fromIndex: worksheet.rowCount + 1,
+      sheetColumns,
+      worksheet,
+      needFill
+    }
+    // 一个sheet上存在多个配送单，使用红色背景行分割
+    if (sheetDatasLength !== index && needFill) {
+      setSheetRowFill(fillData)
+    } else {
+      worksheet.addRow()
+    }
   })
 
   // 自定义sheet列宽, 行高, 放在最后操作
@@ -56,4 +72,39 @@ const exportCoreV2 = (diyOriginals, diyOptions, workbook) => {
   }
 }
 
-export { exportCoreV2 }
+const exportCoreV2MergerOrder = (diyOriginals, diyOptions, workbook) => {
+  const sheetName = diyOptions.sheetName
+  const worksheet = workbook.addWorksheet(sheetName)
+
+  const { config: configs, sheetDatas } = diyOriginals
+  _.forEach(configs, (config, index) => {
+    const sheetDatasLength = sheetDatas.length - 1
+    const sheetColumns = getColumnLength(config)
+    const needFill = _.find(config, item => item.fill)
+    const data = sheetDatas[index]
+    // _.forEach(sheetDatas, (data, index) => {
+    _doExportCoreV2(config, data, worksheet)
+    const fillData = {
+      fromIndex: worksheet.rowCount + 1,
+      sheetColumns,
+      worksheet,
+      needFill
+    }
+    // 一个sheet上存在多个配送单，使用红色背景行分割
+    if (sheetDatasLength !== index && needFill) {
+      setSheetRowFill(fillData)
+    } else {
+      worksheet.addRow()
+    }
+    // })
+    // 自定义sheet列宽, 行高, 放在最后操作
+    const style = _.find(config, item => item.type === 'style')
+    if (style && style.colWidth) {
+      diyToSheetColWidth(worksheet, style.colWidth)
+    }
+    if (style && style.rowHeight) {
+      diyToSheetRowHeight(worksheet, style.rowHeight)
+    }
+  })
+}
+export { exportCoreV2, exportCoreV2MergerOrder }

@@ -23,6 +23,9 @@ const setCellStyle = (cell, style) => {
   }
   cell.alignment = style.alignment || {}
   cell.font = style.font || {}
+  if (style.fill) {
+    cell.fill = style.fill || {}
+  }
 }
 
 /**

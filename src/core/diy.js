@@ -6,7 +6,8 @@ import { setCellStyle } from './paint/cell'
 import {
   getSheetColumns,
   diyToSheetRowHeight,
-  diyToSheetColWidth
+  diyToSheetColWidth,
+  setSheetRowFill
 } from './util'
 
 const diyToSheetTitle = (row, sheetColumns, worksheet) => {
@@ -84,8 +85,9 @@ const diyToSheetCore = (diyOriginals, worksheet) => {
   const { header, content, footer } = config
   // 表格总列数, 由table决定
   const sheetColumns = getSheetColumns(content)
+  const needFill = config.fill
 
-  _.forEach(sheetDatas, data => {
+  _.forEach(sheetDatas, (data, index) => {
     const headerData = {
       fromIndex: worksheet.rowCount + 1,
       header,
@@ -112,25 +114,19 @@ const diyToSheetCore = (diyOriginals, worksheet) => {
       }
       diyToSheetBlock(footerData, sheetColumns, worksheet)
     }
-
-    worksheet.addRows([{}, {}])
+    const fillData = {
+      fromIndex: worksheet.rowCount + 1,
+      sheetColumns,
+      worksheet,
+      needFill
+    }
+    // 一个sheet上存在多个配送单，使用红色背景行分割
+    if (index !== sheetDatas.length - 1 && needFill) {
+      setSheetRowFill(fillData)
+    } else {
+      worksheet.addRows([{}, {}])
+    }
   })
-}
-
-/**
- * diyOriginals - { config, sheetDatas }
- * - config, object, 配置模板
- * - sheetDatas, array, 总sheet数据
- * diyOptions - [{ sheetName, ...}, ...]
- */
-const diyCore = (diyOriginals, diyOptions, workbook) => {
-  const sheetName = diyOptions.sheetName
-  const worksheet = workbook.addWorksheet(sheetName)
-  diyToSheetCore(diyOriginals, worksheet)
-
-  // 自定义sheet列宽
-  const { config } = diyOriginals
-  // const sheetColumns = worksheet.columnCount
   if (config.colWidth) {
     diyToSheetColWidth(worksheet, config.colWidth)
   }
@@ -140,6 +136,93 @@ const diyCore = (diyOriginals, diyOptions, workbook) => {
   if (config.rowHeight) {
     diyToSheetRowHeight(worksheet, config.rowHeight)
   }
+}
+const diyToSheetCoreMergerOrder = (diyOriginals, worksheet) => {
+  // data -- { common, table, block }
+  const { config: configs, sheetDatas } = diyOriginals
+  _.forEach(configs, (config, index) => {
+    const { header, content, footer } = config
+    // 表格总列数, 由table决定
+    const sheetColumns = getSheetColumns(content)
+    const needFill = config.fill
+    const data = sheetDatas[index]
+    // _.forEach(sheetDatas, (data, index) => {
+    const headerData = {
+      fromIndex: worksheet.rowCount + 1,
+      header,
+      data,
+      sheetColumns,
+      worksheet
+    }
+    diyToSheetHeader(headerData)
+
+    const contentData = {
+      content,
+      data,
+      sheetColumns,
+      worksheet
+    }
+    diyTosheetContent(contentData)
+
+    // footer不一定存在
+    if (footer) {
+      const footerData = {
+        block: footer.block,
+        fromIndex: worksheet.rowCount + 1,
+        data: data.common
+      }
+      diyToSheetBlock(footerData, sheetColumns, worksheet)
+    }
+    const fillData = {
+      fromIndex: worksheet.rowCount + 1,
+      sheetColumns,
+      worksheet,
+      needFill
+    }
+    // 一个sheet上存在多个配送单，使用红色背景行分割
+    if (index !== sheetDatas.length - 1 && needFill) {
+      setSheetRowFill(fillData)
+    } else {
+      worksheet.addRows([{}, {}])
+    }
+    if (config.colWidth) {
+      diyToSheetColWidth(worksheet, config.colWidth)
+    }
+
+    // 自定义行高
+    // const sheetRows = worksheet.rowCount
+    if (config.rowHeight) {
+      diyToSheetRowHeight(worksheet, config.rowHeight)
+    }
+    // })
+  })
+}
+
+/**
+ * diyOriginals - { config, sheetDatas }
+ * - config, object, 配置模板
+ * - sheetDatas, array, 总sheet数据
+ * diyOptions - [{ sheetName, ...}, ...]
+ */
+const diyCore = (diyOriginals, diyOptions, workbook, fileMergeRules) => {
+  const sheetName = diyOptions.sheetName
+  const worksheet = workbook.addWorksheet(sheetName)
+  fileMergeRules
+    ? diyToSheetCoreMergerOrder(diyOriginals, worksheet)
+    : diyToSheetCore(diyOriginals, worksheet)
+
+  // 自定义sheet列宽
+  // const { config } = diyOriginals
+  // const sheetColumns = worksheet.columnCount
+  // if (config.colWidth) {
+  //   diyToSheetColWidth(worksheet, config.colWidth)
+  // }
+
+  // // 自定义行高
+  // // const sheetRows = worksheet.rowCount
+  // if (config.rowHeight) {
+  //   diyToSheetRowHeight(worksheet, config.rowHeight)
+  // }
 }
 
 export { diyCore }
