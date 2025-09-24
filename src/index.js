@@ -6,7 +6,7 @@ import {
   exportCoreV2,
   exportSample
 } from './core'
-import { getSheetArray, exportXlsx } from './util'
+import { getSheetArray, exportXlsx, exportXlsxToBlob } from './util'
 
 const doImport = file => {
   return new Promise((resolve, reject) => {
@@ -92,4 +92,22 @@ const doExportV2 = (sheets, options = {}) => {
   exportXlsx(workbook, fileName)
 }
 
-export { doImport, doExport, doExportV2, diyExport }
+// 生成V2版本Excel的Blob对象（参数和doExportV2一样，但返回Blob）
+const generateExcelBlob = (sheets, options = {}) => {
+  if (!ExcelJS) {
+    ExcelJS = window.ExcelJS
+  }
+  const workbook = new ExcelJS.Workbook()
+  const fileName = options.fileName || 'download.xlsx'
+  const fileMergeRules = options.fileMergeRules || 0
+
+  _.forEach(sheets, (sheet, index) => {
+    const option = options.sheetOptions[index]
+    fileMergeRules
+      ? exportCoreV2MergerOrder(sheet, option, workbook)
+      : exportCoreV2(sheet, option, workbook)
+  })
+  return exportXlsxToBlob(workbook, fileName)
+}
+
+export { doImport, doExport, doExportV2, diyExport, generateExcelBlob }
