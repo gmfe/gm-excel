@@ -7,6 +7,7 @@ import {
   getSheetColumns,
   diyToSheetRowHeight,
   diyToSheetColWidth,
+  diyToSheetAutoColWidth,
   setSheetRowFill
 } from './util'
 
@@ -79,7 +80,7 @@ const diyTosheetContent = contentData => {
   })
 }
 
-const diyToSheetCore = (diyOriginals, worksheet) => {
+const diyToSheetCore = (diyOriginals, worksheet, options = {}) => {
   // data -- { common, table, block }
   const { config, sheetDatas } = diyOriginals
   const { header, content, footer } = config
@@ -130,6 +131,7 @@ const diyToSheetCore = (diyOriginals, worksheet) => {
   if (config.colWidth) {
     diyToSheetColWidth(worksheet, config.colWidth)
   }
+  if (options.autoColWidth) diyToSheetAutoColWidth(worksheet)
 
   // 自定义行高
   // const sheetRows = worksheet.rowCount
@@ -137,7 +139,7 @@ const diyToSheetCore = (diyOriginals, worksheet) => {
     diyToSheetRowHeight(worksheet, config.rowHeight)
   }
 }
-const diyToSheetCoreMergerOrder = (diyOriginals, worksheet) => {
+const diyToSheetCoreMergerOrder = (diyOriginals, worksheet, options = {}) => {
   // data -- { common, table, block }
   const { config: configs, sheetDatas } = diyOriginals
   _.forEach(configs, (config, index) => {
@@ -196,6 +198,8 @@ const diyToSheetCoreMergerOrder = (diyOriginals, worksheet) => {
     }
     // })
   })
+  // 自适应列宽基于整表内容计算，放在循环外只执行一次，避免每追加一个单据就全表重扫
+  if (options.autoColWidth) diyToSheetAutoColWidth(worksheet)
 }
 
 /**
@@ -204,12 +208,12 @@ const diyToSheetCoreMergerOrder = (diyOriginals, worksheet) => {
  * - sheetDatas, array, 总sheet数据
  * diyOptions - [{ sheetName, ...}, ...]
  */
-const diyCore = (diyOriginals, diyOptions, workbook, fileMergeRules) => {
+const diyCore = (diyOriginals, diyOptions, workbook, fileMergeRules, options = {}) => {
   const sheetName = diyOptions.sheetName
   const worksheet = workbook.addWorksheet(sheetName)
   fileMergeRules
-    ? diyToSheetCoreMergerOrder(diyOriginals, worksheet)
-    : diyToSheetCore(diyOriginals, worksheet)
+    ? diyToSheetCoreMergerOrder(diyOriginals, worksheet, options)
+    : diyToSheetCore(diyOriginals, worksheet, options)
 
   // 自定义sheet列宽
   // const { config } = diyOriginals

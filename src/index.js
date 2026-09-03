@@ -70,7 +70,7 @@ const diyExport = (sheets, options = {}) => {
 
   _.forEach(sheets, (sheet, index) => {
     const option = options.sheetOptions[index]
-    diyCore(sheet, option, workbook, fileMergeRules)
+    diyCore(sheet, option, workbook, fileMergeRules, options)
   })
   exportXlsx(workbook, fileName)
 }
@@ -86,8 +86,8 @@ const doExportV2 = (sheets, options = {}) => {
   _.forEach(sheets, (sheet, index) => {
     const option = options.sheetOptions[index]
     fileMergeRules
-      ? exportCoreV2MergerOrder(sheet, option, workbook)
-      : exportCoreV2(sheet, option, workbook)
+      ? exportCoreV2MergerOrder(sheet, option, workbook, options)
+      : exportCoreV2(sheet, option, workbook, options)
   })
   exportXlsx(workbook, fileName)
 }
