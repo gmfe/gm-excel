@@ -1,0 +1,64 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      dist-tag:
+        description: 'npm dist-tag(beta=预发布版,latest=正式版)'
+        type: choice
+        options:
+          - beta
+          - latest
+        default: beta
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Publish
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+
+          if [ "${{ github.event_name }}" = 'workflow_dispatch' ] && [ "${{ inputs.dist-tag }}" = 'beta' ]; then
+            # 预发布版:基于 package.json 基础版本 + run_number 生成唯一 beta 号
+            # 只在 CI 里临时 bump(--no-git-tag-version 不提交、不打 tag),不回写仓库
+            BASE=$(node -p "'$VERSION'.replace(/-.*$/,'')")
+            BETA_VERSION="$BASE-beta.${{ github.run_number }}"
+            echo "Publishing beta version: $BETA_VERSION"
+            npm version "$BETA_VERSION" --no-git-tag-version
+            npm publish --tag beta
+          else
+            # 正式版:发布 tag(或手动选 latest)里 package.json 已写好的版本
+            # tag 触发时校验 tag 名与版本一致,防止推错 tag
+            if [ "${{ github.event_name }}" = 'push' ]; then
+              TAG="${GITHUB_REF_NAME#v}"
+              if [ "$TAG" != "$VERSION" ]; then
+                echo "::error::tag v$TAG 与 package.json 版本 $VERSION 不一致"
+                exit 1
+              fi
+            fi
+            # 版本已发布过则拦截,给出明确报错(而不是等 npm 报 EPUBLISHCONFLICT)
+            if [ -n "$(npm view gm-excel@$VERSION version 2>/dev/null)" ]; then
+              echo "::error::gm-excel@$VERSION 已发布过,请先本地 npm version 升级版本号再推 tag"
+              exit 1
+            fi
+            echo "Publishing: gm-excel@$VERSION"
+            npm publish
+          fi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

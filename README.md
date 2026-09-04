@@ -8,6 +8,31 @@ yarn start
 
 ```
 
+### 发布
+
+发版由 GitHub Actions 自动完成（见 `.github/workflows/release.yml`），依赖仓库/组织级 `NPM_TOKEN` secret。
+
+正式版（推 tag 触发，发 `latest`）：
+
+```bash
+yarn release:patch   # 1.0.4 -> 1.0.5 bug 修复
+yarn release:minor   # 1.0.4 -> 1.1.0 新功能
+yarn release:major   # 1.0.4 -> 2.0.0 破坏性变更
+```
+
+命令会自动升级 package.json 版本号、提交并打对应 tag（如 `v1.0.5`）后推送，CI 校验 tag 与版本号一致且未发布过后，发布到 npm。
+
+测试版（手动触发，发 `beta`，不影响 `latest`）：
+
+1. Actions 页面 -> Release -> Run workflow -> dist-tag 选 `beta`
+2. CI 基于当前版本生成唯一测试版本号，如 `1.0.4-beta.42`
+3. 业务方安装测试：`yarn add gm-excel@beta`
+4. 验证通过后，走正式版流程发布
+
+注意：
+- beta 发布失败不要点 Re-run（版本号相同会冲突），重新 Run workflow 即可
+- `npm version` 要求工作区干净，发版前先提交本地改动
+
 ### config 类型
 ```bash
 # block
