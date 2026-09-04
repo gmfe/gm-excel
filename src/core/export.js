@@ -6,10 +6,11 @@ import {
   getColumnLength,
   diyToSheetRowHeight,
   diyToSheetColWidth,
+  diyToSheetAutoColWidth,
   setSheetRowFill
 } from './util'
 
-const _doExportCoreV2 = (config, data, worksheet) => {
+const _doExportCoreV2 = (config, data, worksheet, options = {}) => {
   const sheetColumns = getColumnLength(config)
 
   _.forEach(config, item => {
@@ -23,7 +24,8 @@ const _doExportCoreV2 = (config, data, worksheet) => {
       const tableData = {
         table: item,
         fromIndex: initIndex,
-        data: itemData
+        data: itemData,
+        fastTableStyle: options.fastTableStyle
       }
 
       diyToSheetTable(tableData, worksheet)
@@ -37,7 +39,7 @@ const _doExportCoreV2 = (config, data, worksheet) => {
  * - sheetDatas, array, 总sheet数据
  * diyOptions - [{ sheetName, ...}, ...]
  */
-const exportCoreV2 = (diyOriginals, diyOptions, workbook) => {
+const exportCoreV2 = (diyOriginals, diyOptions, workbook, options = {}) => {
   const sheetName = diyOptions.sheetName
   const worksheet = workbook.addWorksheet(sheetName)
 
@@ -47,7 +49,7 @@ const exportCoreV2 = (diyOriginals, diyOptions, workbook) => {
   const needFill = _.find(config, item => item.fill)
 
   _.forEach(sheetDatas, (data, index) => {
-    _doExportCoreV2(config, data, worksheet)
+    _doExportCoreV2(config, data, worksheet, options)
     const fillData = {
       fromIndex: worksheet.rowCount + 1,
       sheetColumns,
@@ -67,12 +69,13 @@ const exportCoreV2 = (diyOriginals, diyOptions, workbook) => {
   if (style && style.colWidth) {
     diyToSheetColWidth(worksheet, style.colWidth)
   }
+  if (options.autoColWidth) diyToSheetAutoColWidth(worksheet)
   if (style && style.rowHeight) {
     diyToSheetRowHeight(worksheet, style.rowHeight)
   }
 }
 
-const exportCoreV2MergerOrder = (diyOriginals, diyOptions, workbook) => {
+const exportCoreV2MergerOrder = (diyOriginals, diyOptions, workbook, options = {}) => {
   const sheetName = diyOptions.sheetName
   const worksheet = workbook.addWorksheet(sheetName)
 
@@ -83,7 +86,7 @@ const exportCoreV2MergerOrder = (diyOriginals, diyOptions, workbook) => {
     const needFill = _.find(config, item => item.fill)
     const data = sheetDatas[index]
     // _.forEach(sheetDatas, (data, index) => {
-    _doExportCoreV2(config, data, worksheet)
+    _doExportCoreV2(config, data, worksheet, options)
     const fillData = {
       fromIndex: worksheet.rowCount + 1,
       sheetColumns,
@@ -106,5 +109,7 @@ const exportCoreV2MergerOrder = (diyOriginals, diyOptions, workbook) => {
       diyToSheetRowHeight(worksheet, style.rowHeight)
     }
   })
+  // 自适应列宽基于整表内容计算，放在循环外只执行一次，避免每追加一个单据就全表重扫
+  if (options.autoColWidth) diyToSheetAutoColWidth(worksheet)
 }
 export { exportCoreV2, exportCoreV2MergerOrder }

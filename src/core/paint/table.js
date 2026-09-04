@@ -2,20 +2,31 @@ import _ from 'lodash'
 
 import { getBorderStyle } from './cell'
 
-/** table - { fromIndex, table, tableRowCount, style }
+/** table - { fromIndex, table, tableRowCount, style, fastTableStyle }
  */
 const setTableColumnsStyle = (tableColumnsSet, worksheet) => {
-  const { fromIndex, table, tableRowCount, style } = tableColumnsSet
+  const { fromIndex, table, tableRowCount, style, fastTableStyle } = tableColumnsSet
   // 找不到设置table列的除font外的样式设置办法，只能 一层一层 设置
   const { columns } = table
 
   _.forEach(columns, (column, i) => {
+    // 设置单元格样式
+    const columnStyle = column.style || {}
+
+    // 渐进迁移开关：开启后只遍历表格自身的行范围，与旧实现按行号过滤的结果一致，
+    // 但不扫全列，大 sheet（如连续导出上千单）下避免 O(表数 × 列数 × 全表行数) 的无效迭代
+    if (fastTableStyle) {
+      const cellStyle = { ...style, ...columnStyle }
+      for (let row = fromIndex; row < fromIndex + tableRowCount; row++) {
+        worksheet.getRow(row).getCell(i + 1).style = cellStyle
+      }
+      return
+    }
+
     const col = worksheet.getColumn(i + 1)
 
     col.eachCell((cell, index) => {
       if (index >= fromIndex && index - fromIndex < tableRowCount) {
-        // 设置单元格样式
-        const columnStyle = column.style || {}
         cell.style = {
           ...style,
           ...columnStyle
@@ -26,7 +37,7 @@ const setTableColumnsStyle = (tableColumnsSet, worksheet) => {
 }
 
 const setTableStyle = (tableSet, worksheet) => {
-  const { fromIndex, table, tableRowCount } = tableSet
+  const { fromIndex, table, tableRowCount, fastTableStyle } = tableSet
 
   // 默认每一列居中，其它情况需自定义设置
   const defaultAlignment = {
@@ -75,7 +86,8 @@ const setTableStyle = (tableSet, worksheet) => {
     },
     fromIndex: fromIndex + 1,
     tableRowCount,
-    table
+    table,
+    fastTableStyle
   }
   setTableColumnsStyle(tableColumnsSet, worksheet)
 }
@@ -119,7 +131,7 @@ const getTableColumns = (table, worksheet) => {
  * data -- table数据，{id, columns(每行数据)}
  */
 const diyToSheetTable = (tableDatas, worksheet) => {
-  const { fromIndex, table, data } = tableDatas
+  const { fromIndex, table, data, fastTableStyle } = tableDatas
   const columns = getTableColumns(table, worksheet)
   const tableData = data.columns
   const tableRows = getTableRows(columns, tableData, worksheet)
@@ -130,7 +142,7 @@ const diyToSheetTable = (tableDatas, worksheet) => {
   }
 
   setTableStyle(
-    { fromIndex: rowIndex, table, tableRowCount: tableRows.length },
+    { fromIndex: rowIndex, table, tableRowCount: tableRows.length, fastTableStyle },
     worksheet
   )
 }
