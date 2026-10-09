@@ -5,7 +5,13 @@ import { getBorderStyle } from './cell'
 /** table - { fromIndex, table, tableRowCount, style, fastTableStyle }
  */
 const setTableColumnsStyle = (tableColumnsSet, worksheet) => {
-  const { fromIndex, table, tableRowCount, style, fastTableStyle } = tableColumnsSet
+  const {
+    fromIndex,
+    table,
+    tableRowCount,
+    style,
+    fastTableStyle
+  } = tableColumnsSet
   // 找不到设置table列的除font外的样式设置办法，只能 一层一层 设置
   const { columns } = table
 
@@ -38,6 +44,7 @@ const setTableColumnsStyle = (tableColumnsSet, worksheet) => {
 
 const setTableStyle = (tableSet, worksheet) => {
   const { fromIndex, table, tableRowCount, fastTableStyle } = tableSet
+  const { columns } = table
 
   // 默认每一列居中，其它情况需自定义设置
   const defaultAlignment = {
@@ -67,11 +74,15 @@ const setTableStyle = (tableSet, worksheet) => {
     tableAlignment = defaultAlignment
   }
 
-  // 对表头进行设置，默认居中
+  // 对表头进行设置，默认居中；列级 headerStyle.alignment 可覆盖（与打印端表头对齐一致）
   if (!table.disabledHeaderRow) {
     const headerRow = worksheet.getRow(fromIndex)
-    headerRow.eachCell(cell => {
-      cell.alignment = defaultAlignment
+    headerRow.eachCell((cell, colNumber) => {
+      const headerColumnStyle = (columns && columns[colNumber - 1]) || {}
+      cell.alignment =
+        (headerColumnStyle.headerStyle &&
+          headerColumnStyle.headerStyle.alignment) ||
+        defaultAlignment
       cell.border = tableBorder
       cell.font = tableFont
     })
@@ -142,7 +153,12 @@ const diyToSheetTable = (tableDatas, worksheet) => {
   }
 
   setTableStyle(
-    { fromIndex: rowIndex, table, tableRowCount: tableRows.length, fastTableStyle },
+    {
+      fromIndex: rowIndex,
+      table,
+      tableRowCount: tableRows.length,
+      fastTableStyle
+    },
     worksheet
   )
 }
