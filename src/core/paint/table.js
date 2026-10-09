@@ -74,7 +74,7 @@ const setTableStyle = (tableSet, worksheet) => {
     tableAlignment = defaultAlignment
   }
 
-  // 对表头进行设置，默认居中；列级 headerStyle.alignment 可覆盖（与打印端表头对齐一致）
+  // 对表头进行设置，默认居中；列级 headerStyle.alignment / headerStyle.font 可覆盖（与打印端表头一致）
   if (!table.disabledHeaderRow) {
     const headerRow = worksheet.getRow(fromIndex)
     headerRow.eachCell((cell, colNumber) => {
@@ -84,7 +84,9 @@ const setTableStyle = (tableSet, worksheet) => {
           headerColumnStyle.headerStyle.alignment) ||
         defaultAlignment
       cell.border = tableBorder
-      cell.font = tableFont
+      cell.font =
+        (headerColumnStyle.headerStyle && headerColumnStyle.headerStyle.font) ||
+        tableFont
     })
   }
 
