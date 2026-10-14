@@ -22,6 +22,9 @@ const setCellStyle = (cell, style) => {
     cell.border = getBorderStyle(style.border)
   }
   cell.alignment = style.alignment || {}
+  if (style.wrapText) {
+    cell.alignment = { ...cell.alignment, wrapText: true }
+  }
   cell.font = style.font || {}
   if (style.fill) {
     cell.fill = style.fill || {}

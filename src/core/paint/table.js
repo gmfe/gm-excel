@@ -2,6 +2,31 @@ import _ from 'lodash'
 
 import { getBorderStyle } from './cell'
 
+/** 表头/列样式里取字号：兼容模板 {fontSize} 与 Excel {font.size} */
+const getStyleFontSize = style => {
+  if (!style) return null
+  if (style.font?.size) return style.font.size
+  if (style.fontSize) return parseInt(style.fontSize, 10) || null
+  return null
+}
+
+const resolveHeaderFont = (column, tableFont) => {
+  const hs = column.headStyle || column.headerStyle
+  if (!hs) return tableFont
+  if (hs.font) {
+    return { ...tableFont, ...hs.font }
+  }
+  const size = getStyleFontSize(hs)
+  if (size) {
+    return {
+      ...tableFont,
+      size,
+      bold: hs.fontWeight ? true : tableFont.bold
+    }
+  }
+  return tableFont
+}
+
 /** table - { fromIndex, table, tableRowCount, style, fastTableStyle }
  */
 const setTableColumnsStyle = (tableColumnsSet, worksheet) => {
@@ -36,6 +61,32 @@ const setTableColumnsStyle = (tableColumnsSet, worksheet) => {
   })
 }
 
+const bumpTableRowHeights = (fromIndex, table, tableRowCount, style, worksheet) => {
+  const defaultSize = style?.font?.size || 11
+  // 与 setTableColumnsStyle 一致：body 从 fromIndex+1 起（disabledHeaderRow 时 fromIndex 已减 1）
+  const bodyStart = fromIndex + 1
+  // 表头行高
+  if (!table.disabledHeaderRow) {
+    const headerRow = worksheet.getRow(fromIndex)
+    let headerSize = defaultSize
+    _.forEach(table.columns, column => {
+      const size = getStyleFontSize(column.headStyle || column.headerStyle)
+      if (size) headerSize = Math.max(headerSize, size)
+    })
+    headerRow.height = Math.max(headerRow.height || 0, headerSize * 1.35 || 18)
+  }
+  // 正文行高：取列 style 字号，缺省 ~18
+  for (let r = 0; r < tableRowCount; r++) {
+    const row = worksheet.getRow(bodyStart + r)
+    let size = defaultSize
+    _.forEach(table.columns, column => {
+      const colSize = getStyleFontSize(column.style)
+      if (colSize) size = Math.max(size, colSize)
+    })
+    row.height = Math.max(row.height || 0, (size || 11) * 1.35 || 18)
+  }
+}
+
 const setTableStyle = (tableSet, worksheet) => {
   const { fromIndex, table, tableRowCount, fastTableStyle } = tableSet
 
@@ -67,17 +118,18 @@ const setTableStyle = (tableSet, worksheet) => {
     tableAlignment = defaultAlignment
   }
 
-  // 对表头进行设置，默认居中
+  // 对表头进行设置，默认居中；优先列 headStyle / headerStyle 字号
   if (!table.disabledHeaderRow) {
     const headerRow = worksheet.getRow(fromIndex)
-    headerRow.eachCell(cell => {
+    headerRow.eachCell((cell, colNumber) => {
+      const column = table.columns[colNumber - 1] || {}
       cell.alignment = defaultAlignment
       cell.border = tableBorder
-      cell.font = tableFont
+      cell.font = resolveHeaderFont(column, tableFont)
     })
   }
 
-  // 处理table的列
+  // 处理table的列（body：合并 column.style）
   const tableColumnsSet = {
     style: {
       border: tableBorder,
@@ -90,6 +142,13 @@ const setTableStyle = (tableSet, worksheet) => {
     fastTableStyle
   }
   setTableColumnsStyle(tableColumnsSet, worksheet)
+  bumpTableRowHeights(
+    fromIndex,
+    table,
+    tableRowCount,
+    tableColumnsSet.style,
+    worksheet
+  )
 }
 
 const getTableRows = (columns, data, worksheet) => {

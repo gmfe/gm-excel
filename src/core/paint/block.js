@@ -6,7 +6,7 @@ import {
   diyToSheetRowAll,
   diyCustomToSheetRow
 } from './row'
-import { diyCustomToSheetMergeCells } from './cell'
+import { diyCustomToSheetMergeCells, setCellStyle } from './cell'
 
 const diyToSheetBlockPre = (
   { item, initIndex, itemData, sheetColumns },
@@ -78,11 +78,11 @@ const diyCustomToSheetBlock = (blockData, worksheet) => {
 
   _.forEach(data, (item, index) => {
     let style = block.style || {}
-    // 行样式
+    // 行样式：合并 rows[0].style（此前误写成 item.style）
     if (rows[0].style) {
       style = {
         ...style,
-        ...item.style
+        ...rows[0].style
       }
     }
 
@@ -94,8 +94,22 @@ const diyCustomToSheetBlock = (blockData, worksheet) => {
     }
     diyCustomToSheetRow(row, worksheet)
   })
-  // 合并单元格
+  // 合并单元格（与既有逻辑一致：按 rows[0].columns 从 fromIndex 合并）
   diyCustomToSheetMergeCells(fromIndex, rows[0].columns, worksheet)
+
+  // 合并后按 size 占列偏移，把 column.style 落到合并锚点单元格
+  let mergedStyle = block.style || {}
+  if (rows[0].style) {
+    mergedStyle = { ...mergedStyle, ...rows[0].style }
+  }
+  let colOffset = 1
+  _.forEach(rows[0].columns, column => {
+    if (column.style) {
+      const cell = worksheet.getRow(fromIndex).getCell(colOffset)
+      setCellStyle(cell, { ...mergedStyle, ...column.style })
+    }
+    colOffset += (column.size && column.size[1]) || 1
+  })
 }
 
 export { diyToSheetBlockPre, diyToSheetBlock }

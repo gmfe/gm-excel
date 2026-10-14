@@ -23,6 +23,14 @@ const setRowStyle = (rowIndex, style, worksheet) => {
   }
 }
 
+/** 按字号抬高行高，避免全局默认行高裁切大标题 */
+const bumpRowHeightByFont = (rowIndex, fontSize, worksheet) => {
+  if (!fontSize) return
+  const nowRow = worksheet.getRow(rowIndex)
+  const nextHeight = fontSize * 1.35
+  nowRow.height = Math.max(nowRow.height || 0, nextHeight)
+}
+
 /**
  * 按顺序分布行 - 形式为字段名：字段值, 若需合并，操作字段值所在单元格
  * row - 行信息，{ rowIndex, rowKeys, rowData, rowStyle } -> {第几行, 行分布, 行数据, 行样式}
@@ -98,6 +106,9 @@ const diyToSheetRowAll = (row, sheetColumns, worksheet) => {
   // style
   const cell = worksheet.getRow(rowIndex).getCell(1)
   setCellStyle(cell, rowStyle)
+  if (rowStyle?.font?.size) {
+    bumpRowHeightByFont(rowIndex, rowStyle.font.size, worksheet)
+  }
 }
 
 const diyCustomToSheetRow = (row, worksheet) => {
@@ -109,6 +120,18 @@ const diyCustomToSheetRow = (row, worksheet) => {
 
   // 设置样式
   setRowStyle(rowIndex, rowStyle, worksheet)
+
+  // 合并前：每 key 一格，列号为 i+1；按格覆盖 column.style
+  _.forEach(rowKeys, (column, i) => {
+    if (column.style) {
+      const cell = worksheet.getRow(rowIndex).getCell(i + 1)
+      setCellStyle(cell, { ...rowStyle, ...column.style })
+    }
+  })
+
+  if (rowStyle?.font?.size) {
+    bumpRowHeightByFont(rowIndex, rowStyle.font.size, worksheet)
+  }
 }
 
 export {
