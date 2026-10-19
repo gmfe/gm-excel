@@ -131,7 +131,11 @@ const diyToSheetCore = (diyOriginals, worksheet, options = {}) => {
   if (config.colWidth) {
     diyToSheetColWidth(worksheet, config.colWidth)
   }
-  if (options.autoColWidth) diyToSheetAutoColWidth(worksheet)
+  // autoColWidthIgnoreFont: 退回旧的纯字符计数算法，保持既有导出的列宽表现
+  if (options.autoColWidth)
+    diyToSheetAutoColWidth(worksheet, {
+      ignoreFont: options.autoColWidthIgnoreFont
+    })
 
   // 自定义行高
   // const sheetRows = worksheet.rowCount
@@ -199,7 +203,11 @@ const diyToSheetCoreMergerOrder = (diyOriginals, worksheet, options = {}) => {
     // })
   })
   // 自适应列宽基于整表内容计算，放在循环外只执行一次，避免每追加一个单据就全表重扫
-  if (options.autoColWidth) diyToSheetAutoColWidth(worksheet)
+  // autoColWidthIgnoreFont: 退回旧的纯字符计数算法，保持既有导出的列宽表现
+  if (options.autoColWidth)
+    diyToSheetAutoColWidth(worksheet, {
+      ignoreFont: options.autoColWidthIgnoreFont
+    })
 }
 
 /**
@@ -208,7 +216,13 @@ const diyToSheetCoreMergerOrder = (diyOriginals, worksheet, options = {}) => {
  * - sheetDatas, array, 总sheet数据
  * diyOptions - [{ sheetName, ...}, ...]
  */
-const diyCore = (diyOriginals, diyOptions, workbook, fileMergeRules, options = {}) => {
+const diyCore = (
+  diyOriginals,
+  diyOptions,
+  workbook,
+  fileMergeRules,
+  options = {}
+) => {
   const sheetName = diyOptions.sheetName
   const worksheet = workbook.addWorksheet(sheetName)
   fileMergeRules
