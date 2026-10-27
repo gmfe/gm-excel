@@ -30,7 +30,13 @@ const resolveHeaderFont = (column, tableFont) => {
 /** table - { fromIndex, table, tableRowCount, style, fastTableStyle }
  */
 const setTableColumnsStyle = (tableColumnsSet, worksheet) => {
-  const { fromIndex, table, tableRowCount, style, fastTableStyle } = tableColumnsSet
+  const {
+    fromIndex,
+    table,
+    tableRowCount,
+    style,
+    fastTableStyle
+  } = tableColumnsSet
   // 找不到设置table列的除font外的样式设置办法，只能 一层一层 设置
   const { columns } = table
 
@@ -61,7 +67,13 @@ const setTableColumnsStyle = (tableColumnsSet, worksheet) => {
   })
 }
 
-const bumpTableRowHeights = (fromIndex, table, tableRowCount, style, worksheet) => {
+const bumpTableRowHeights = (
+  fromIndex,
+  table,
+  tableRowCount,
+  style,
+  worksheet
+) => {
   const defaultSize = style?.font?.size || 11
   // 与 setTableColumnsStyle 一致：body 从 fromIndex+1 起（disabledHeaderRow 时 fromIndex 已减 1）
   const bodyStart = fromIndex + 1
@@ -89,6 +101,7 @@ const bumpTableRowHeights = (fromIndex, table, tableRowCount, style, worksheet) 
 
 const setTableStyle = (tableSet, worksheet) => {
   const { fromIndex, table, tableRowCount, fastTableStyle } = tableSet
+  const { columns } = table
 
   // 默认每一列居中，其它情况需自定义设置
   const defaultAlignment = {
@@ -118,12 +131,13 @@ const setTableStyle = (tableSet, worksheet) => {
     tableAlignment = defaultAlignment
   }
 
-  // 对表头进行设置，默认居中；优先列 headStyle / headerStyle 字号
+  // 对表头进行设置，默认居中；列级 headStyle / headerStyle 的 alignment、font 可覆盖（与打印端表头一致）
   if (!table.disabledHeaderRow) {
     const headerRow = worksheet.getRow(fromIndex)
     headerRow.eachCell((cell, colNumber) => {
-      const column = table.columns[colNumber - 1] || {}
-      cell.alignment = defaultAlignment
+      const column = (columns && columns[colNumber - 1]) || {}
+      const headerColumnStyle = column.headStyle || column.headerStyle || {}
+      cell.alignment = headerColumnStyle.alignment || defaultAlignment
       cell.border = tableBorder
       cell.font = resolveHeaderFont(column, tableFont)
     })
@@ -201,7 +215,12 @@ const diyToSheetTable = (tableDatas, worksheet) => {
   }
 
   setTableStyle(
-    { fromIndex: rowIndex, table, tableRowCount: tableRows.length, fastTableStyle },
+    {
+      fromIndex: rowIndex,
+      table,
+      tableRowCount: tableRows.length,
+      fastTableStyle
+    },
     worksheet
   )
 }
