@@ -69,13 +69,22 @@ const exportCoreV2 = (diyOriginals, diyOptions, workbook, options = {}) => {
   if (style && style.colWidth) {
     diyToSheetColWidth(worksheet, style.colWidth)
   }
-  if (options.autoColWidth) diyToSheetAutoColWidth(worksheet)
+  // autoColWidthIgnoreFont: 退回旧的纯字符计数算法，保持既有导出的列宽表现
+  if (options.autoColWidth)
+    diyToSheetAutoColWidth(worksheet, {
+      ignoreFont: options.autoColWidthIgnoreFont
+    })
   if (style && style.rowHeight) {
     diyToSheetRowHeight(worksheet, style.rowHeight)
   }
 }
 
-const exportCoreV2MergerOrder = (diyOriginals, diyOptions, workbook, options = {}) => {
+const exportCoreV2MergerOrder = (
+  diyOriginals,
+  diyOptions,
+  workbook,
+  options = {}
+) => {
   const sheetName = diyOptions.sheetName
   const worksheet = workbook.addWorksheet(sheetName)
 
@@ -110,6 +119,10 @@ const exportCoreV2MergerOrder = (diyOriginals, diyOptions, workbook, options = {
     }
   })
   // 自适应列宽基于整表内容计算，放在循环外只执行一次，避免每追加一个单据就全表重扫
-  if (options.autoColWidth) diyToSheetAutoColWidth(worksheet)
+  // autoColWidthIgnoreFont: 退回旧的纯字符计数算法，保持既有导出的列宽表现
+  if (options.autoColWidth)
+    diyToSheetAutoColWidth(worksheet, {
+      ignoreFont: options.autoColWidthIgnoreFont
+    })
 }
 export { exportCoreV2, exportCoreV2MergerOrder }
